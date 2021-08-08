@@ -1,0 +1,25 @@
+#连接池
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/community
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+#开发时先关闭缓存
+  thymeleaf:
+    cache: false
+#mybatis配置
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.dongppman.community.entity
+  configuration:
+    #开启自增
+    use-generated-keys: true
+    #字段不区分大小写,所以如果大写字母往往用下划线保存,user_name=userName而这个支持两者能够匹配
+    map-underscore-to-camel-case: true
+
+server:
+  servlet:
+    context-path: /community
