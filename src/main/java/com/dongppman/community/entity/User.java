@@ -16,7 +16,7 @@ import java.util.Date;
 @ToString
 public class User {
     @TableId(type=IdType.AUTO)
-    private String id;
+    private Integer id;
     private String password;
     private String salt;
     private String email;

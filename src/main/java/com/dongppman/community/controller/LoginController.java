@@ -4,16 +4,20 @@ import com.dongppman.community.entity.User;
 import com.dongppman.community.service.UserService;
 import com.dongppman.community.util.CommunityConstant;
 import com.google.code.kaptcha.Producer;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
@@ -31,6 +35,9 @@ public class LoginController implements CommunityConstant {
     @Autowired
     Producer producer;
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
     @RequestMapping(path = "/register",method = RequestMethod.GET)
     public String RegisterPage(){
         return "/site/register";
@@ -41,7 +48,7 @@ public class LoginController implements CommunityConstant {
         return "/site/login";
     }
 
-    //只要属性名和值相匹配
+    //注册页面,只要属性名和值相匹配
     @RequestMapping(path = "/register",method = RequestMethod.POST)
     public String register(Model model, User user)
     {
@@ -58,6 +65,7 @@ public class LoginController implements CommunityConstant {
             return "/site/register";
         }
     }
+    //生成激活页面
     @RequestMapping(path = "/activation/{userId}/{code}",method = RequestMethod.GET)
     public String activation(Model model, @PathVariable("userId") int userId,@PathVariable("code") String code) {
         int result = userService.activation(userId, code);
@@ -73,7 +81,7 @@ public class LoginController implements CommunityConstant {
         }
         return  "/site/operate-result";
     }
-    //获取图片
+    //获取验证码图片
     @RequestMapping(path = "/kaptcha",method = RequestMethod.GET)
     public  void  getKaptcha(HttpServletResponse response, HttpSession session)
     {
@@ -93,5 +101,40 @@ public class LoginController implements CommunityConstant {
             logger.error("响应验证码失败"+e.getMessage());
         }
 
+    }
+
+    //登陆功能,如果参数不是对象,springmvc不会自动注入到model中,所以要么加入到model内,要么从request域取值
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    public String login(String username, String password, String code, boolean rememberme,
+                        Model model, HttpSession session, HttpServletResponse response)
+    {
+        //验证验证码
+        String kaptcha =(String)  session.getAttribute("kaptcha");
+        if(StringUtils.isBlank(kaptcha)||StringUtils.isBlank(code)||!kaptcha.equalsIgnoreCase(code))
+        {
+            model.addAttribute("codeMsg","验证码不正确");
+            return "site/login";
+        }
+        //验证账号
+        int expiredSeconds=rememberme? REMEBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
+        Map<String,Object> map = userService.login(username,password,expiredSeconds);
+        if(map.containsKey("ticket"))
+        {
+            Cookie cookie=new Cookie("ticket",map.get("ticket").toString());
+            cookie.setPath(contextPath);
+            cookie.setMaxAge(expiredSeconds);
+            response.addCookie(cookie);
+            return "redirect:/index";
+        }else {
+            model.addAttribute("usernameMsg",map.get("usernameMsg"));
+            model.addAttribute("passwordMsg",map.get("passwordMsg"));
+            return "/site/login";
+        }
+    }
+    @RequestMapping(value = "/logout",method = RequestMethod.GET)
+    public  String logout(@CookieValue("ticket") String ticket)
+    {
+        userService.logout(ticket);
+        return "redirect:/login";
     }
 }

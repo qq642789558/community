@@ -49,10 +49,5 @@ public class HomeController {
         model.addAttribute("discussPosts",discussPosts);
         return "/index";
     }
-    @ResponseBody
-    @GetMapping("/hello")
-    public String hello(){
-        return "hello";
-    }
 
 }

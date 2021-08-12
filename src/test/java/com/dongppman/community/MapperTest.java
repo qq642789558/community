@@ -1,7 +1,10 @@
 package com.dongppman.community;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dongppman.community.dao.LoginTicketMapper;
 import com.dongppman.community.dao.UserMapper;
 import com.dongppman.community.entity.DiscussPost;
+import com.dongppman.community.entity.LoginTicket;
 import com.dongppman.community.entity.User;
 import com.dongppman.community.service.DiscussPostService;
 import com.dongppman.community.service.UserService;
@@ -21,7 +24,8 @@ public class MapperTest {
 
     @Autowired
     UserService userService;
-
+    @Autowired
+    LoginTicketMapper loginTicketMapper;
 
     @Test
     public void test1(){
@@ -52,4 +56,24 @@ public class MapperTest {
         User userById = userService.findUserById(101);
         System.out.println(userById.getHeaderUrl());
     }
+    @Test
+    public void testLoginTicket(){
+        LoginTicket loginTicket=new LoginTicket();
+        loginTicket.setUserId(101);
+        loginTicket.setTicket("abc");
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis()+1000*60*10));
+        loginTicketMapper.insert(loginTicket);
+
+    }
+    @Test
+    public void testSelectTicket(){
+        loginTicketMapper.updateStatusByTicket("abc",1);
+        QueryWrapper<LoginTicket> wrapper=new QueryWrapper<>();
+        wrapper.eq("ticket","abc");
+        LoginTicket loginTicket=loginTicketMapper.selectOne(wrapper);
+        System.out.println(loginTicket);
+
+    }
+
 }
