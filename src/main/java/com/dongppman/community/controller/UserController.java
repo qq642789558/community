@@ -3,6 +3,7 @@ package com.dongppman.community.controller;
 import com.dongppman.community.annotation.LoginRequired;
 import com.dongppman.community.dao.UserMapper;
 import com.dongppman.community.entity.User;
+import com.dongppman.community.service.LikeService;
 import com.dongppman.community.service.UserService;
 import com.dongppman.community.util.CommunityUtil;
 import com.dongppman.community.util.HostHolder;
@@ -46,6 +47,10 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
+
     @LoginRequired
     @RequestMapping(value = "/setting",method = RequestMethod.GET)
     public String getSettingPage(){
@@ -148,6 +153,20 @@ public class UserController {
         userService.updatePassword(user.getId(),newPassword);
         return "redirect:/index";
     }
+
+    //个人主页
+    @RequestMapping(path = "/profile/{userId}",method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId,Model model)
+    {
+         User user=userService.findUserById(userId);
+         if (user==null){
+             throw new RuntimeException("该用户不存在");
+         }
+         model.addAttribute("user",user);
+        int userLikeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount",userLikeCount);
+        return "/site/profile";
     }
+}
 
 

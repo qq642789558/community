@@ -49,6 +49,11 @@ public class UserService implements CommunityConstant {
     private String contextPath;
 
 
+    public User findUserByName(String name)
+    {
+        return userMapper.selectByName(name);
+    }
+
     public Map<String,Object> register(User user){
         Map<String,Object>map=new HashMap<>();
         //空值处理

@@ -2,9 +2,11 @@ package com.dongppman.community;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dongppman.community.dao.LoginTicketMapper;
+import com.dongppman.community.dao.MessageMapper;
 import com.dongppman.community.dao.UserMapper;
 import com.dongppman.community.entity.DiscussPost;
 import com.dongppman.community.entity.LoginTicket;
+import com.dongppman.community.entity.Message;
 import com.dongppman.community.entity.User;
 import com.dongppman.community.service.DiscussPostService;
 import com.dongppman.community.service.UserService;
@@ -26,6 +28,9 @@ public class MapperTest {
     UserService userService;
     @Autowired
     LoginTicketMapper loginTicketMapper;
+
+    @Autowired
+    MessageMapper messageMapper;
 
     @Test
     public void test1(){
@@ -74,6 +79,19 @@ public class MapperTest {
         LoginTicket loginTicket=loginTicketMapper.selectOne(wrapper);
         System.out.println(loginTicket);
 
+    }
+    @Test
+    public void testSelectLetters(){
+        //List<Message> messages = messageMapper.selectConversations(111, 0, 20);
+
+//        List<Message> messages = messageMapper.selectLetters("111_112", 0, 10);
+//        messages.forEach(System.out::println);
+        int count = messageMapper.selectConversationCount(111);
+        System.out.println(count);
+        count=messageMapper.selectLetterCount("111_112");
+        System.out.println(count);
+        count=messageMapper.selectLetterUnreadCount(131,"111_131");
+        System.out.println(count);
     }
 
 }
