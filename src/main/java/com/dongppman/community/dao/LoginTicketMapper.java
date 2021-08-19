@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * @Entity com.dongppman.community.entity.LoginTicket
  */
+@Deprecated
 @Component(value = "LoginTicketMapper")
 public interface LoginTicketMapper extends BaseMapper<LoginTicket>
 {

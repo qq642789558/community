@@ -35,6 +35,10 @@ public class ServiceLogAspect {
     public void before(JoinPoint joinPoint){
        //
         ServletRequestAttributes attributes= (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        //有可能为空?不是通过controller调用的,导致出现空指针异常
+        if (attributes==null){
+            return;
+        }
         HttpServletRequest request=attributes.getRequest();
         String ip=request.getRemoteHost();
         String now=new SimpleDateFormat("yyy-MM-dd HH:mm:ss").format(new Date());

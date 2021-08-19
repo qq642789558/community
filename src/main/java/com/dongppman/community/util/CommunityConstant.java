@@ -32,5 +32,27 @@ public interface CommunityConstant {
      * 实体评论
      */
     int ENTITY_TYPE_COMMENT=2;
+
+    /**
+     * 关注人
+     */
+    int ENTITY_TYPE_USER=3;
+
+    /**
+     * 主题:评论
+     */
+    String TOPIC_COMMENT="comment";
+    /**
+     * 点赞
+     */
+    String TOPIC_LIKE="like";
+    /**
+     * 关注
+     */
+    String TOPIC_FOLLOW="follow";
+    /**
+     * 系统用户的id=1
+     */
+    int SYSTEM_USERID=1;
 }
 

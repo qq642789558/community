@@ -30,6 +30,17 @@ public interface MessageMapper extends BaseMapper<Message> {
 
     int updateStatus(List<Integer>ids,int status);
 
+    //某一个主题的最新通知通知
+    Message selectLatestNotice(int userId,String topic);
+    //某个主题包含的通知数量
+    int selectNoticeCount(int userId,String topic);
+
+    //未读的通知数量
+    int selectNoticeUnreadCount(int userId,String topic);
+
+
+    //某个主题包含的通知列表
+    List<Message> selectNotices(int userId,String topic,int offset,int limit);
 
 }
 
