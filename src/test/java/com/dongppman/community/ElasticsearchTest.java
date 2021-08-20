@@ -1,5 +1,26 @@
 package com.dongppman.community;
 
+import com.dongppman.community.dao.DiscussPostMapper;
+import com.dongppman.community.dao.elasticsearch.DiscussPostRepository;
+import com.dongppman.community.entity.DiscussPost;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Eleasticsearch是一种分布式的,restful风格的搜索引擎
  * 支持各种类型的检索,可以提供实时的搜索服务,搜索速度快
@@ -29,7 +50,90 @@ package com.dongppman.community;
  * 			"fields":["title","content"]
  *                }* 	}
  * }
+ *
+ * 绿色，已经加入控制暂未提交
+ * 红色，未加入版本控制
+ * 蓝色，加入，已提交，有改动
+ * 白色，加入，已提交，无改动
+ * 灰色：版本控制已忽略文件。
+ *
  */
-
+@SpringBootTest
 public class ElasticsearchTest {
+
+    @Autowired
+    private DiscussPostMapper discussPostMapper;
+
+    @Autowired
+    private DiscussPostRepository discussPostRepository;
+
+    @Autowired
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+
+    //加入数据
+    @Test
+    public void testInsert(){
+        elasticsearchRestTemplate.save(discussPostMapper.selectById(241));
+        elasticsearchRestTemplate.save(discussPostMapper.selectById(242));
+        elasticsearchRestTemplate.save(discussPostMapper.selectById(243));
+    }
+
+    @Test
+    public void tsetInsertList(){
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPorts(101,0,100));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPorts(102,0,100));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPorts(111,0,100));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPorts(112,0,100));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPorts(132,0,100));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPorts(134,0,100));
+    }
+
+    @Test
+    public void testUpdate(){
+        DiscussPost discussPost=discussPostMapper.selectById(231);
+        discussPost.setContent("what'up bro?");
+        discussPostRepository.save(discussPost);
+
+    }
+
+    @Test
+    public void testSearchByRepository(){
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.multiMatchQuery("互联网寒冬", "title", "content"))
+         //排序,首先按照type的顺序,然后是score,然后是createTime
+                .withSort(SortBuilders.fieldSort("type").order(SortOrder.DESC))
+                .withSort(SortBuilders.fieldSort("score").order(SortOrder.DESC))
+                .withSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC))
+                //第一页开始,每页显示10条
+                .withPageable(PageRequest.of(0, 10))
+                .withHighlightFields(
+                        //指定高亮字段
+                        new HighlightBuilder.Field("title").preTags("<em>").postTags("</em>"),
+                        new HighlightBuilder.Field("content").preTags("<em>").postTags("</em>")
+                ).build();
+        SearchHits<DiscussPost> search = elasticsearchRestTemplate.search(searchQuery, DiscussPost.class);
+
+        // 得到查询结果返回的内容
+        List<SearchHit<DiscussPost>> searchHits = search.getSearchHits();
+        // 设置一个需要返回的实体类集合
+        List<DiscussPost> discussPosts = new ArrayList<>();
+        // 遍历返回的内容进行处理
+        for(SearchHit<DiscussPost> searchHit : searchHits){
+            // 高亮的内容
+            Map<String, List<String>> highLightFields = searchHit.getHighlightFields();
+            // 将高亮的内容填充到content中,有就覆盖
+            //可能匹配多个,取第一个
+            searchHit.getContent().setTitle(highLightFields.get("title") == null ? searchHit.getContent().getTitle() : highLightFields.get("title").get(0));
+            searchHit.getContent().setTitle(highLightFields.get("content") == null ? searchHit.getContent().getContent() : highLightFields.get("content").get(0));
+            System.out.println(searchHit.getContent());
+            // 放到实体类中
+            discussPosts.add(searchHit.getContent());
+
+        }
+//        System.out.println(searchHits);
+//        System.out.println(discussPosts);
+    }
+
+
+
 }

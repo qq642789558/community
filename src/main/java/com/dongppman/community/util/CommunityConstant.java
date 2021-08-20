@@ -54,5 +54,9 @@ public interface CommunityConstant {
      * 系统用户的id=1
      */
     int SYSTEM_USERID=1;
+    /**
+     *
+     */
+    String TOPIC_PUBLISH="publish";
 }
 

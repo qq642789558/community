@@ -45,6 +45,13 @@ spring:
 #      自动提交频率:3秒
       auto-commit-interval: 3000
 
+#elasticsearch
+
+elasticsearch:
+  host: 127.0.0.1
+  port: 9200
+#集群名字:
+
 #mybatis配置
 
 mybatis-plus:

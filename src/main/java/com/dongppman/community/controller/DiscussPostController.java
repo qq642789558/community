@@ -1,9 +1,7 @@
 package com.dongppman.community.controller;
 
-import com.dongppman.community.entity.Comment;
-import com.dongppman.community.entity.DiscussPost;
-import com.dongppman.community.entity.Page;
-import com.dongppman.community.entity.User;
+import com.dongppman.community.entity.*;
+import com.dongppman.community.event.EventProducer;
 import com.dongppman.community.service.CommentService;
 import com.dongppman.community.service.DiscussPostService;
 import com.dongppman.community.service.LikeService;
@@ -39,6 +37,9 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
 
     @RequestMapping(value = "/add",method = RequestMethod.POST)
     @ResponseBody
@@ -55,6 +56,15 @@ public class DiscussPostController implements CommunityConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+        //触发发帖事件,将事件存入
+        Event event=new Event()
+                        .setTopic(TOPIC_PUBLISH)
+                        .setUserId(user.getId())
+                        .setEntityType(ENTITY_TYPE_POST)
+                        .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
+
+        //根据情况来返回值
         return  CommunityUtil.getJSONString(0,"发布成功");
 
     }

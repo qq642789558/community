@@ -1,8 +1,11 @@
 package com.dongppman.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dongppman.community.entity.DiscussPost;
 import com.dongppman.community.entity.Event;
 import com.dongppman.community.entity.Message;
+import com.dongppman.community.service.DiscussPostService;
+import com.dongppman.community.service.ElasticsearchService;
 import com.dongppman.community.service.MessageService;
 import com.dongppman.community.util.CommunityConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,8 +26,15 @@ public class EventConsumer implements CommunityConstant {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private ElasticsearchService elasticsearchService;
+
     @KafkaListener(topics ={TOPIC_COMMENT,TOPIC_FOLLOW,TOPIC_LIKE} )
     public void handleCommentMessage(ConsumerRecord record){
+        //判断消息
         if (record==null||record.value()==null){
             LOGGER.error("消息内容为空");
         }
@@ -33,6 +43,7 @@ public class EventConsumer implements CommunityConstant {
             LOGGER.error("消息格式错误!");
             return;
         }
+        //建立会话
         Message message=new Message();
         message.setFromId(SYSTEM_USERID);
         message.setToId(event.getEntityId());
@@ -51,5 +62,20 @@ public class EventConsumer implements CommunityConstant {
         message.setContent(JSONObject.toJSONString(content));
         //调用了service
         messageService.addMessage(message);
+    }
+
+    @KafkaListener(topics = {TOPIC_PUBLISH})
+    public void handlePublishMessage( ConsumerRecord record){
+        if (record==null||record.value()==null){
+            LOGGER.error("消息内容为空");
+        }
+        Event event= JSONObject.parseObject(record.value().toString(),Event.class);
+        if (event==null){
+            LOGGER.error("消息格式错误!");
+            return;
+        }
+        DiscussPost post=discussPostService.getById(event.getEntityId());
+        elasticsearchService.saveDiscussPost(post);
+
     }
 }

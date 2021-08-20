@@ -7,6 +7,7 @@ import java.util.Map;
 
 
 public class Event {
+    //事件主题
     private String topic;
     //触发事件的人
     private int userId;
