@@ -17,16 +17,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private MessageInterceptor messageInterceptor;
 
-    @Autowired
-    private LoginRequiredInterceptor loginRequiredInterceptor;
+    /**
+     * 用security替代登陆拦截器
+     * @param registry
+     */
+   // @Autowired
+    //private LoginRequiredInterceptor loginRequiredInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
         registry.addInterceptor(loginTicketInterceptor)
                 .excludePathPatterns("/**/*.css","/**/*.png","/**/*.jpg","/**/*.js","/**/*.jpeg");
 
-        registry.addInterceptor(loginRequiredInterceptor)
-                .excludePathPatterns("/**/*.css","/**/*.png","/**/*.jpg","/**/*.js","/**/*.jpeg");
+       // registry.addInterceptor(loginRequiredInterceptor)
+         //       .excludePathPatterns("/**/*.css","/**/*.png","/**/*.jpg","/**/*.js","/**/*.jpeg");
         registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/**/*.css","/**/*.png","/**/*.jpg","/**/*.js","/**/*.jpeg");
     }

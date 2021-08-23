@@ -58,5 +58,23 @@ public interface CommunityConstant {
      *
      */
     String TOPIC_PUBLISH="publish";
+
+    String TOPIC_DELETE="delete";
+
+    /**
+     * 普通用户
+     */
+
+    String AUTHORITY_USER="user";
+
+    /**
+     * 管理员
+     */
+    String AUTHORITY_ADMIN="admin";
+
+    /**
+     * 版主
+     */
+    String AUTHORITY_MODERATOR="moderator";
 }
 

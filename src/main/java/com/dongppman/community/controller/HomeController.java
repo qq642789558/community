@@ -55,5 +55,8 @@ public class HomeController implements CommunityConstant {
         model.addAttribute("discussPosts",discussPosts);
         return "/index";
     }
-
+    @RequestMapping(value = "/denied",method = RequestMethod.GET)
+    public String getDeniedPage(){
+        return "/error/404";
+    }
 }

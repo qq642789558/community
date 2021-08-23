@@ -52,5 +52,15 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
         return discussPostMapper.updateById(discussPost);
     }
 
+    @Override
+    public int updateType(int id, int type) {
+        return discussPostMapper.updateType(id,type);
+    }
+
+    @Override
+    public int updateStatus(int id, int status) {
+       return discussPostMapper.updateStatus(id,status);
+    }
+
 
 }

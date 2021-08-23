@@ -30,6 +30,5 @@ public class redisTest {
         System.out.println(redisTemplate.opsForHash().get(redisKey, "id"));
         System.out.println(redisTemplate.opsForHash().get(redisKey, "username"));
 
-
     }
 }

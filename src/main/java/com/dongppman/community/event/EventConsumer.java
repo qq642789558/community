@@ -46,7 +46,7 @@ public class EventConsumer implements CommunityConstant {
         //建立会话
         Message message=new Message();
         message.setFromId(SYSTEM_USERID);
-        message.setToId(event.getEntityId());
+        message.setToId(event.getEntityUserId());
         message.setConversationId(event.getTopic());
         message.setCreateTime(new Date());
 
@@ -54,7 +54,7 @@ public class EventConsumer implements CommunityConstant {
         content.put("userId",event.getUserId());
         content.put("entityType",event.getEntityType());
         content.put("entityId",event.getEntityId());
-        if (event.getData().isEmpty()){
+        if (!event.getData().isEmpty()){
             for (Map.Entry<String,Object> entry: event.getData().entrySet()) {
                 content.put(entry.getKey(),entry.getValue());
             }
@@ -76,6 +76,20 @@ public class EventConsumer implements CommunityConstant {
         }
         DiscussPost post=discussPostService.getById(event.getEntityId());
         elasticsearchService.saveDiscussPost(post);
+
+    }
+
+    @KafkaListener(topics = {TOPIC_DELETE})
+    public void handleDleteMessage( ConsumerRecord record){
+        if (record==null||record.value()==null){
+            LOGGER.error("消息内容为空");
+        }
+        Event event= JSONObject.parseObject(record.value().toString(),Event.class);
+        if (event==null){
+            LOGGER.error("消息格式错误!");
+            return;
+        }
+        elasticsearchService.deleteDiscussPost(event.getEntityId());
 
     }
 }

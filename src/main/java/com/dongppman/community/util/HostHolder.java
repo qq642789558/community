@@ -1,6 +1,7 @@
 package com.dongppman.community.util;
 
 import com.dongppman.community.entity.User;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class HostHolder {
     private  ThreadLocal<User> users=new ThreadLocal<>();
 
-    public void setUsers(User user){
+    public void setUser(User user){
         users.set(user);
     }
     public  User getUser(){
@@ -19,5 +20,6 @@ public class HostHolder {
     }
     public void clear(){
         users.remove();
+//        SecurityContextHolder.clearContext();
     }
 }
